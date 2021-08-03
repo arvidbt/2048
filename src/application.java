@@ -15,8 +15,15 @@ public class application extends JFrame implements KeyListener{
     public JButton newGameButton = new JButton();
     public JPanel[][] boardPanels = new JPanel[4][4];
     public JLabel[][] boardNumbers = new JLabel[4][4];
-    public int highScoreINT = 0;
-    public int currentINT = 0;
+
+    public JLabel scoreLabelPoints = new JLabel("0");
+    public JLabel highScoreLabelPoints = new JLabel("0");
+
+    public JPanel scorePanel = new JPanel();
+    public JPanel highScorePanel = new JPanel();
+
+    public int highScoreINT = 0; // save to a textfile? And load from it?
+    public int currentINT = 0; // update freq. and check if it exceeds highscore
 
     private int[][] valBoard = new int[4][4];
 
@@ -47,7 +54,6 @@ public class application extends JFrame implements KeyListener{
     }
 
     private void initScoreBoard() {
-
         JPanel title = new JPanel();
         JPanel info = new JPanel();
         JLabel titleLabel = new JLabel("2048");
@@ -56,8 +62,23 @@ public class application extends JFrame implements KeyListener{
         JLabel newGameButtonLabel = new JLabel("New Game");
         JLabel infoLabel = new JLabel("Join the numbers and get to the 2048 tile!");
 
+
         topBoard.setLayout(null);
         topBoard.setBackground(Color.decode("#fbf8ef"));
+
+        scorePanel.setBounds(725,90, 180, 65);
+        scorePanel.setBackground(Color.decode("#bcafa0"));
+        scoreLabelPoints.setFont(new Font("Verdana", Font.BOLD, 45));
+        scoreLabelPoints.setForeground(Color.decode("#fbf8ef"));
+        scorePanel.add(scoreLabelPoints);
+        topBoard.add(scorePanel);
+
+        highScorePanel.setBounds(505,90, 180, 65);
+        highScorePanel.setBackground(Color.decode("#bcafa0"));
+        highScoreLabelPoints.setFont(new Font("Verdana", Font.BOLD, 45));
+        highScoreLabelPoints.setForeground(Color.decode("#fbf8ef"));
+        highScorePanel.add(highScoreLabelPoints);
+        topBoard.add(highScorePanel);
 
         info.setBackground(Color.decode("#fbf8ef"));
         info.setBounds(50, 200, 600, 100);
@@ -66,6 +87,30 @@ public class application extends JFrame implements KeyListener{
         infoLabel.setForeground(Color.decode("#726b63"));
         topBoard.add(info);
 
+        topBoard.add(newGameButton);
+        newGameButton.setBackground(Color.decode("#8e7862"));
+        newGameButton.add(newGameButtonLabel);
+        newGameButton.setFocusable(false);
+        newGameButton.setBounds(715, 185, 200,75);
+        newGameButton.addActionListener(e->newGame());
+        newGameButtonLabel.setFont(new Font("Verdana", Font.BOLD, 27));
+        newGameButtonLabel.setForeground(Color.decode("#fbf8ef"));
+
+        topBoard.add(score);
+        score.setBackground(Color.decode("#bcafa0"));
+        score.setBounds(715,50, 200,125);
+        score.add(scoreLabel);
+        scoreLabel.setFont(new Font("Verdana", Font.BOLD, 25));
+        scoreLabel.setForeground(Color.decode("#fbf8ef"));
+
+
+        topBoard.add(highScore);
+        highScore.setBackground(Color.decode("#bcafa0"));
+        highScore.setBounds(495, 50, 200,125);
+        highScore.add(highScoreLabel);
+        highScoreLabel.setFont(new Font("Verdana", Font.BOLD, 25));
+        highScoreLabel.setForeground(Color.decode("#fbf8ef"));
+
         title.setBackground(Color.decode("#fbf8ef"));
         title.setBounds(-40, 40, 500, 200);
         titleLabel.setFont(new Font("Verdana",Font.BOLD,120));
@@ -73,31 +118,28 @@ public class application extends JFrame implements KeyListener{
         title.add(titleLabel);
         topBoard.add(title);
 
-        topBoard.add(newGameButton);
-        newGameButton.setBackground(Color.decode("#8e7862"));
-        newGameButton.add(newGameButtonLabel);
-        newGameButton.setFocusable(false);
-        newGameButton.setBounds(780, 175, 200,75);
-        newGameButton.addActionListener(e->newGame());
-        newGameButtonLabel.setFont(new Font("Verdana", Font.BOLD, 25));
-        newGameButtonLabel.setForeground(Color.white);
-
-        topBoard.add(score);
-        score.setBackground(Color.decode("#bcafa0"));
-        score.setBounds(780,40, 200,125);
-        score.add(scoreLabel);
-        scoreLabel.setFont(new Font("Verdana", Font.BOLD, 25));
-        scoreLabel.setForeground(Color.white);
-
-
-        topBoard.add(highScore);
-        highScore.setBackground(Color.decode("#bcafa0"));
-        highScore.setBounds(560, 40, 200,125);
-        highScore.add(highScoreLabel);
-        highScoreLabel.setFont(new Font("Verdana", Font.BOLD, 25));
-        highScoreLabel.setForeground(Color.white);
-
         this.add(topBoard);
+    }
+
+    private void rotateBoard90Degree() {
+        int[]temp = new int[16];
+        int index = 0;
+
+        for(int row = 0; row < 4; row++)
+        {
+            for(int col = 3; col >= 0; col--)
+            {
+                temp[index] = valBoard[row][col];
+                index++;
+            }
+        }
+        index = 0;
+        for(int row = 0; row < 4; row++) {
+            for(int col = 0; col < 4; col++) {
+                valBoard[row][col] = temp[index];
+                index++;
+            }
+        }
     }
 
     private int spawnValues() {
@@ -121,7 +163,6 @@ public class application extends JFrame implements KeyListener{
                 setBrickColor( val, row, col);
                 inserted = true;
             }
-
         }
     }
 
@@ -143,18 +184,15 @@ public class application extends JFrame implements KeyListener{
         runGame();
     }
 
-    private void printBoard() {
-
-    }
-
     private void newGame() {
         for(int i = 0; i < 4; i++) {
             for(int j = 0; j < 4; j++) {
                 setBrickColor(0,i,j);
                 valBoard[i][j] = 0;
-
             }
         }
+        resetScore();
+        removeKeyListener(this);
         insertStartValues();
         insertStartValues();
         runGame();
@@ -169,42 +207,78 @@ public class application extends JFrame implements KeyListener{
 
     public void keyPressed(KeyEvent e) {
         int key = e.getKeyCode();
-        if(key == KeyEvent.VK_RIGHT) {
-            insertStartValues();
+        if(isGameOver()) {
+            if (key == KeyEvent.VK_RIGHT) {
+                moveRight();
+            } else if (key == KeyEvent.VK_LEFT) {
+                moveLeft();
+            } else if (key == KeyEvent.VK_UP) {
+                moveUp();
+            } else if (key == KeyEvent.VK_DOWN) {
+                moveDown();
+            }
         }
-        else if(key == KeyEvent.VK_LEFT) {
-            insertStartValues();
-        }
-        else if(key == KeyEvent.VK_UP) {
-            insertStartValues();
-        }
-        else if(key == KeyEvent.VK_DOWN) {
-            insertStartValues();
-        }
+    }
+
+    public void moveUp() {
+        insertStartValues();
+        setScore(2);
+        setHighScore();
+    }
+
+    public void moveDown() {
+        insertStartValues();
+        setScore(2);
+        setHighScore();
+    }
+
+    public void moveRight() {
+        insertStartValues();
+        setScore(2);
+        setHighScore();
+    }
+
+    public void moveLeft() {
+        insertStartValues();
+        setScore(2);
+        setHighScore();
     }
 
     @Override
     public void keyReleased(KeyEvent keyEvent) {}
 
     private boolean isGameOver() {
-        boolean isGameOver = false;
         int fullBoard = 0;
-        for(int i = 0; i < 4; i++) {
+        for(int i = 0; i < 4; i++){
             for(int j = 0; j < 4; j++) {
                 if(valBoard[i][j] != 0) {
                     fullBoard++;
                 }
-
-                if(valBoard[i][j] == 2048) {
-                    isGameOver = true;
-                }
-            }
-            if(fullBoard == 16 && noMovesPossible()) {
-                isGameOver = true;
             }
         }
-        return isGameOver;
+        return fullBoard != 16;
     }
+
+    private void resetScore() {
+        this.currentINT = 0;
+        String scoreStr = Integer.toString(currentINT);
+        scoreLabelPoints.setText(scoreStr);
+    }
+
+    private void setScore(int score) {
+        this.currentINT += score;
+        String scoreStr = Integer.toString(currentINT);
+        scoreLabelPoints.setText(scoreStr);
+    }
+
+    private void setHighScore() {
+        if(this.currentINT > highScoreINT) {
+            highScoreINT = currentINT;
+            String scoreStr = Integer.toString(highScoreINT);
+            highScoreLabelPoints.setText(scoreStr);
+        }
+    }
+
 
     private boolean noMovesPossible() {
         boolean moveIsNotPossible = true;
@@ -236,37 +310,35 @@ public class application extends JFrame implements KeyListener{
             case 2:
                 changeBlock(i, j, "2", 110, "#7b6f60", "#eee4da");
                 break;
-
             case 4:
-                changeBlock(i, j, "4", 110, "#7a7169", "#ece0c8");
+                changeBlock(i, j, "4", 110, "#7b6f60", "#ece0c8");
                 break;
-
             case 8:
-                changeBlock(i,j,"8", 110, "#7a7169", "#f2b179");
+                changeBlock(i,j,"8", 110, "#fff9f7", "#f2b179");
                 break;
             case 16:
-                changeBlock(i,j, "16", 110, "#7a7169", "#f59563");
+                changeBlock(i,j, "16", 110, "#fff9f7", "#f59563");
                 break;
             case 32:
-                changeBlock(i,j,"32", 110, "#7a7169", "#f47d60");
+                changeBlock(i,j,"32", 110, "#fff9f7", "#f47d60");
                 break;
             case 64:
-                changeBlock(i,j,"64", 110, "#7a7169", "#f55d3c");
+                changeBlock(i,j,"64", 110, "#fff9f7", "#f55d3c");
                 break;
             case 128:
-                changeBlock(i,j,"128", 110, "#7a7169", "#efcd72");
+                changeBlock(i,j,"128", 110, "#fff9f7", "#efcd72");
                 break;
             case 256:
-                changeBlock(i,j,"256", 110, "#7a7169", "#eccc64");
+                changeBlock(i,j,"256", 110, "#fff9f7", "#eccc64");
                 break;
             case 512:
-                changeBlock(i,j,"512", 110, "#7a7169", "#ecc850");
+                changeBlock(i,j,"512", 110, "#fff9f7", "#ecc850");
                 break;
             case 1024:
-                changeBlock(i,j,"1024", 110, "#7a7169", "#edc53f");
+                changeBlock(i,j,"1024", 110, "#fff9f7", "#edc53f");
                 break;
             case 2048:
-                changeBlock(i,j,"2048", 110, "#7a7169", "#ecc135");
+                changeBlock(i,j,"2048", 110, "#fff9f7", "#ecc135");
                 break;
         }
     }
