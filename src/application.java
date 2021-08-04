@@ -4,6 +4,8 @@ import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.io.*;
+import java.util.Scanner;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class application extends JFrame implements KeyListener{
@@ -24,13 +26,13 @@ public class application extends JFrame implements KeyListener{
 
     public int highScoreINT = 0; // save to a textfile? And load from it?
     public int currentINT = 0; // update freq. and check if it exceeds highscore
+    public File highScoreFile = new File("/home/arvid/Code/java/2048/src/highscore.txt");
 
     private int[][] valBoard = new int[4][4];
 
-    private boolean gameOver = false;
     private final Border border = new LineBorder(Color.decode("#bbada0"), 12, false);
 
-    application() {
+    application() throws FileNotFoundException {
         this.setSize(1000,1360);
         this.setDefaultCloseOperation(EXIT_ON_CLOSE);
         this.setTitle("2048");
@@ -47,8 +49,8 @@ public class application extends JFrame implements KeyListener{
         this.setVisible(true);
     }
 
-
-    private void startGame() {
+    private void startGame() throws FileNotFoundException {
+        loadHighScore();
         initScoreBoard();
         initBoard();
     }
@@ -91,8 +93,14 @@ public class application extends JFrame implements KeyListener{
         newGameButton.setBackground(Color.decode("#8e7862"));
         newGameButton.add(newGameButtonLabel);
         newGameButton.setFocusable(false);
-        newGameButton.setBounds(715, 185, 200,75);
-        newGameButton.addActionListener(e->newGame());
+        newGameButton.setBounds(715, 190, 200,75);
+        newGameButton.addActionListener(e-> {
+            try {
+                newGame();
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        });
         newGameButtonLabel.setFont(new Font("Verdana", Font.BOLD, 27));
         newGameButtonLabel.setForeground(Color.decode("#fbf8ef"));
 
@@ -122,24 +130,13 @@ public class application extends JFrame implements KeyListener{
     }
 
     private void rotateBoard90Degree() {
-        int[]temp = new int[16];
-        int index = 0;
-
-        for(int row = 0; row < 4; row++)
-        {
-            for(int col = 3; col >= 0; col--)
-            {
-                temp[index] = valBoard[row][col];
-                index++;
+        int[][] rotGrid=new int[4][4];
+        for(int row=0;row<4;row++) {
+            for(int col=0;col<4;col++) {
+                rotGrid[col][4-1-row]=this.valBoard[row][col];
             }
         }
-        index = 0;
-        for(int row = 0; row < 4; row++) {
-            for(int col = 0; col < 4; col++) {
-                valBoard[row][col] = temp[index];
-                index++;
-            }
-        }
+        this.valBoard=rotGrid;
     }
 
     private int spawnValues() {
@@ -184,13 +181,14 @@ public class application extends JFrame implements KeyListener{
         runGame();
     }
 
-    private void newGame() {
+    private void newGame() throws IOException {
         for(int i = 0; i < 4; i++) {
             for(int j = 0; j < 4; j++) {
                 setBrickColor(0,i,j);
                 valBoard[i][j] = 0;
             }
         }
+        setHighScore();
         resetScore();
         removeKeyListener(this);
         insertStartValues();
@@ -221,27 +219,117 @@ public class application extends JFrame implements KeyListener{
     }
 
     public void moveUp() {
-        insertStartValues();
-        setScore(2);
-        setHighScore();
+        boolean moveSuccessful = moveAndAdd();
+        moveAndInsert(moveSuccessful);
     }
 
     public void moveDown() {
-        insertStartValues();
-        setScore(2);
-        setHighScore();
+        for(int i = 0; i < 2; i++) {
+            rotateBoard90Degree();
+        }
+        boolean moveSuccessful = moveAndAdd();
+        moveAndInsert(moveSuccessful);
+        for(int i = 0; i < 2; i++) {
+            rotateBoard90Degree();
+        }
     }
 
     public void moveRight() {
-        insertStartValues();
-        setScore(2);
-        setHighScore();
+        for(int i = 0; i < 3; i++) {
+            rotateBoard90Degree();
+        }
+        boolean moveSuccessful = moveAndAdd();
+        moveAndInsert(moveSuccessful);
+        rotateBoard90Degree();
     }
 
     public void moveLeft() {
-        insertStartValues();
-        setScore(2);
-        setHighScore();
+        rotateBoard90Degree();
+        boolean moveSuccessful = moveAndAdd();
+        moveAndInsert(moveSuccessful);
+        for(int i = 0; i < 3; i++) {
+            rotateBoard90Degree();
+        }
+    }
+
+    public boolean addTogether() {
+        boolean added = false;
+
+        for(int row = 0; row < 3; row++) {
+            for(int col = 0; col < 4; col++) {
+                if(valBoard[row][col] == valBoard[row + 1][col]) {
+                    if(valBoard[row][col] != 0) {
+                        added = true;
+                    }
+                    valBoard[row][col] = (valBoard[row][col] * 2);
+                    setBrickColor(valBoard[row][col], row, col);
+                    valBoard[row+1][col] = 0;
+
+                    if(valBoard[row][col] != 0) {
+                        added = true;
+                        setScore(valBoard[row][col]);
+                    }
+                }
+            }
+        }
+        return added;
+    }
+
+    public boolean moveAndAdd() {
+        boolean moveSuccessful = false;
+
+        for(int row = 1; row < 4; row++) {
+            for(int col = 0; col < 4; col++) {
+                if(row > 0) {
+                    if(valBoard[row][col] != 0 && valBoard[row-1][col] == 0 && (row > 1)) {
+
+                        valBoard[row-1][col] = valBoard[row][col];
+                        valBoard[row][col] = 0;
+                        setBrickColor(0, row, col);
+                        row = row - 2;
+                        moveSuccessful = true;
+                    }
+
+                    if(row == 1 && valBoard[row][col] != 0 && valBoard[row - 1][col] == 0)
+                    {
+                        valBoard[row-1][col] = valBoard[row][col];
+                        valBoard[row][col] = 0;
+                        setBrickColor(0, row, col);
+
+                        moveSuccessful = true;
+                    }
+                }
+            }
+        }
+
+        if(addTogether()) {
+            moveSuccessful = true;
+        }
+        System.out.println(moveSuccessful);
+        return moveSuccessful;
+    }
+
+    public void moveAndInsert(boolean moveSuccessful) {
+        for(int row = 1; row < 4; row++) {
+            for(int col = 0; col < 4; col++) {
+                if(row > 0) {
+                    if(valBoard[row][col] != 0 && valBoard[row - 1][col] == 0 && (row > 1)) {
+                        valBoard[row-1][col] = valBoard[row][col];
+                        valBoard[row][col] = 0;
+                        row = row - 2;
+                    }
+
+                    if(row == 1 && valBoard[row][col] != 0 && valBoard[row - 1][col] == 0) {
+                        valBoard[row-1][col] = valBoard[row][col];
+                        valBoard[row][col] = 0;
+                    }
+                }
+            }
+        }
+
+        if(moveSuccessful) {
+            insertStartValues();
+        }
     }
 
     @Override
@@ -259,6 +347,7 @@ public class application extends JFrame implements KeyListener{
         return fullBoard != 16;
     }
 
+    //=====SCORE METHODS - MODULE? ================
     private void resetScore() {
         this.currentINT = 0;
         String scoreStr = Integer.toString(currentINT);
@@ -271,13 +360,34 @@ public class application extends JFrame implements KeyListener{
         scoreLabelPoints.setText(scoreStr);
     }
 
-    private void setHighScore() {
+    private void setHighScore() throws IOException {
         if(this.currentINT > highScoreINT) {
             highScoreINT = currentINT;
             String scoreStr = Integer.toString(highScoreINT);
             highScoreLabelPoints.setText(scoreStr);
+            saveHighScore();
         }
     }
+
+    // Loads highscore from textfile.
+    public void loadHighScore() throws FileNotFoundException {
+        Scanner sc = new Scanner(highScoreFile);
+        if(sc.hasNextInt()) {
+            highScoreINT = sc.nextInt();
+            String scoreStr = Integer.toString(highScoreINT);
+            highScoreLabelPoints.setText(scoreStr);
+        }
+    }
+
+    // Saves highscore to textfile,
+    public void saveHighScore() throws IOException {
+        try (Writer writer = new BufferedWriter(new FileWriter("/home/arvid/Code/java/2048/src/highscore.txt"))) {
+            writer.write(Integer.toString(highScoreINT));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    //=================================================
 
 
     private boolean noMovesPossible() {
@@ -312,12 +422,15 @@ public class application extends JFrame implements KeyListener{
                 break;
             case 4:
                 changeBlock(i, j, "4", 110, "#7b6f60", "#ece0c8");
+                System.out.println("2");
                 break;
             case 8:
                 changeBlock(i,j,"8", 110, "#fff9f7", "#f2b179");
+                System.out.println("8");
                 break;
             case 16:
                 changeBlock(i,j, "16", 110, "#fff9f7", "#f59563");
+                System.out.println("16");
                 break;
             case 32:
                 changeBlock(i,j,"32", 110, "#fff9f7", "#f47d60");
@@ -326,23 +439,25 @@ public class application extends JFrame implements KeyListener{
                 changeBlock(i,j,"64", 110, "#fff9f7", "#f55d3c");
                 break;
             case 128:
-                changeBlock(i,j,"128", 110, "#fff9f7", "#efcd72");
+                changeBlock(i,j,"128", 90, "#fff9f7", "#efcd72");
                 break;
             case 256:
-                changeBlock(i,j,"256", 110, "#fff9f7", "#eccc64");
+                changeBlock(i,j,"256", 90, "#fff9f7", "#eccc64");
                 break;
             case 512:
-                changeBlock(i,j,"512", 110, "#fff9f7", "#ecc850");
+                changeBlock(i,j,"512", 90, "#fff9f7", "#ecc850");
                 break;
             case 1024:
-                changeBlock(i,j,"1024", 110, "#fff9f7", "#edc53f");
+                changeBlock(i,j,"1024", 70, "#fff9f7", "#edc53f");
                 break;
             case 2048:
-                changeBlock(i,j,"2048", 110, "#fff9f7", "#ecc135");
+                changeBlock(i,j,"2048", 70, "#fff9f7", "#ecc135");
                 break;
         }
     }
 
+    //TODO
+    //Fix number center
     public void changeBlock(int i, int j, String number, int fontSize, String fontColor, String panelColor) {
         boardNumbers[i][j].setText(number);
         boardPanels[i][j].add(boardNumbers[i][j]);
