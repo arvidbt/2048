@@ -207,23 +207,39 @@ public class application extends JFrame implements KeyListener{
         int key = e.getKeyCode();
         if(isGameOver()) {
             if (key == KeyEvent.VK_RIGHT) {
-                moveRight();
+                try {
+                    moveRight();
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
             } else if (key == KeyEvent.VK_LEFT) {
-                moveLeft();
+                try {
+                    moveLeft();
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
             } else if (key == KeyEvent.VK_UP) {
-                moveUp();
+                try {
+                    moveUp();
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
             } else if (key == KeyEvent.VK_DOWN) {
-                moveDown();
+                try {
+                    moveDown();
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
             }
         }
     }
 
-    public void moveUp() {
+    public void moveUp() throws IOException {
         boolean moveSuccessful = moveAndAdd();
         moveAndInsert(moveSuccessful);
     }
 
-    public void moveDown() {
+    public void moveDown() throws IOException {
         for(int i = 0; i < 2; i++) {
             rotateBoard90Degree();
         }
@@ -234,7 +250,7 @@ public class application extends JFrame implements KeyListener{
         }
     }
 
-    public void moveRight() {
+    public void moveRight() throws IOException {
         for(int i = 0; i < 3; i++) {
             rotateBoard90Degree();
         }
@@ -243,7 +259,7 @@ public class application extends JFrame implements KeyListener{
         rotateBoard90Degree();
     }
 
-    public void moveLeft() {
+    public void moveLeft() throws IOException {
         rotateBoard90Degree();
         boolean moveSuccessful = moveAndAdd();
         moveAndInsert(moveSuccessful);
@@ -252,7 +268,7 @@ public class application extends JFrame implements KeyListener{
         }
     }
 
-    public boolean addTogether() {
+    public boolean addTogether() throws IOException {
         boolean added = false;
 
         for(int row = 0; row < 3; row++) {
@@ -268,6 +284,7 @@ public class application extends JFrame implements KeyListener{
                     if(valBoard[row][col] != 0) {
                         added = true;
                         setScore(valBoard[row][col]);
+                        setHighScore();
                     }
                 }
             }
@@ -275,7 +292,7 @@ public class application extends JFrame implements KeyListener{
         return added;
     }
 
-    public boolean moveAndAdd() {
+    public boolean moveAndAdd() throws IOException {
         boolean moveSuccessful = false;
 
         for(int row = 1; row < 4; row++) {
