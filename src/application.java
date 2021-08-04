@@ -83,7 +83,7 @@ public class application extends JFrame implements KeyListener{
         topBoard.add(highScorePanel);
 
         info.setBackground(Color.decode("#fbf8ef"));
-        info.setBounds(50, 200, 600, 100);
+        info.setBounds(50, 210, 600, 100);
         info.add(infoLabel);
         infoLabel.setFont(new Font("Verdana", Font.BOLD, 25));
         infoLabel.setForeground(Color.decode("#726b63"));
@@ -157,7 +157,8 @@ public class application extends JFrame implements KeyListener{
             if(valBoard[row][col] == 0) {
                 int val = spawnValues();
                 valBoard[row][col] = val;
-                setBrickColor( val, row, col);
+                setBrickColor(val, row, col);
+                System.out.println("spawn at ("+ row + "," + col + ") " + val);
                 inserted = true;
             }
         }
@@ -207,144 +208,211 @@ public class application extends JFrame implements KeyListener{
         int key = e.getKeyCode();
         if(isGameOver()) {
             if (key == KeyEvent.VK_RIGHT) {
-                try {
-                    moveRight();
-                } catch (IOException ex) {
-                    ex.printStackTrace();
-                }
+                moveRight();
             } else if (key == KeyEvent.VK_LEFT) {
-                try {
-                    moveLeft();
-                } catch (IOException ex) {
-                    ex.printStackTrace();
-                }
+                moveLeft();
             } else if (key == KeyEvent.VK_UP) {
-                try {
-                    moveUp();
-                } catch (IOException ex) {
-                    ex.printStackTrace();
-                }
+                moveUp();
             } else if (key == KeyEvent.VK_DOWN) {
-                try {
-                    moveDown();
-                } catch (IOException ex) {
-                    ex.printStackTrace();
-                }
+                moveDown();
             }
         }
     }
 
-    public void moveUp() throws IOException {
-        boolean moveSuccessful = moveAndAdd();
-        moveAndInsert(moveSuccessful);
-    }
-
-    public void moveDown() throws IOException {
-        for(int i = 0; i < 2; i++) {
-            rotateBoard90Degree();
-        }
-        boolean moveSuccessful = moveAndAdd();
-        moveAndInsert(moveSuccessful);
-        for(int i = 0; i < 2; i++) {
-            rotateBoard90Degree();
-        }
-    }
-
-    public void moveRight() throws IOException {
-        for(int i = 0; i < 3; i++) {
-            rotateBoard90Degree();
-        }
-        boolean moveSuccessful = moveAndAdd();
-        moveAndInsert(moveSuccessful);
-        rotateBoard90Degree();
-    }
-
-    public void moveLeft() throws IOException {
-        rotateBoard90Degree();
-        boolean moveSuccessful = moveAndAdd();
-        moveAndInsert(moveSuccessful);
-        for(int i = 0; i < 3; i++) {
-            rotateBoard90Degree();
-        }
-    }
-
-    public boolean addTogether() throws IOException {
+    public void moveUp() {
         boolean added = false;
-
-        for(int row = 0; row < 3; row++) {
-            for(int col = 0; col < 4; col++) {
-                if(valBoard[row][col] == valBoard[row + 1][col]) {
-                    if(valBoard[row][col] != 0) {
-                        added = true;
+        for(int col=0;col<4;col++) {
+            int count=0;
+            for(int row=0;row<4;row++) {
+                if(this.valBoard[row][col]!=0) {
+                    this.valBoard[count][col]=this.valBoard[row][col];
+                    setBrickColor(valBoard[count][col], count, col);
+                    if(count !=row) {
+                        this.valBoard[row][col]=0;
+                        setBrickColor(0, row, col);
                     }
-                    valBoard[row][col] = (valBoard[row][col] * 2);
+                    count++;
+                }
+            }
+        }
+
+        for(int col=0;col<4;col++) {
+            for(int row=0;row<4-1;row++) {
+                if(this.valBoard[row][col]==this.valBoard[row+1][col]) {
+                    this.valBoard[row][col] += this.valBoard[row + 1][col];
+                    this.valBoard[row+1][col]=0;
                     setBrickColor(valBoard[row][col], row, col);
-                    valBoard[row+1][col] = 0;
-
-                    if(valBoard[row][col] != 0) {
+                    setBrickColor(0, row+1, col);
+                    setScore(valBoard[row][col]);
+                    added = true;
+                    break;
+                }
+            }
+        }
+        for(int col=0;col<4;col++) {
+            int count=0;
+            for(int row=0;row<4;row++) {
+                if(this.valBoard[row][col]!=0) {
+                    this.valBoard[count][col]=this.valBoard[row][col];
+                    setBrickColor(valBoard[count][col], count, col);
+                    if(count !=row) {
+                        this.valBoard[row][col]=0;
+                        setBrickColor(0, row, col);
                         added = true;
-                        setScore(valBoard[row][col]);
-                        setHighScore();
                     }
+                    count++;
                 }
             }
         }
-        return added;
+        if(added) {
+            insertStartValues();
+        }
     }
 
-    public boolean moveAndAdd() throws IOException {
-        boolean moveSuccessful = false;
-
-        for(int row = 1; row < 4; row++) {
-            for(int col = 0; col < 4; col++) {
-                if(row > 0) {
-                    if(valBoard[row][col] != 0 && valBoard[row-1][col] == 0 && (row > 1)) {
-
-                        valBoard[row-1][col] = valBoard[row][col];
-                        valBoard[row][col] = 0;
+    public void moveDown() {
+        boolean added = false;
+        for(int col=0;col<4;col++){
+            int count=0;
+            for(int row=4-1;row>=0;row--) {
+                if(this.valBoard[row][col]!=0) {
+                    this.valBoard[4-1-count][col]=this.valBoard[row][col];
+                    setBrickColor(valBoard[4-1-count][col], 4-1-count, col);
+                    if(4-1-count!=row) {
+                        this.valBoard[row][col]=0;
                         setBrickColor(0, row, col);
-                        row = row - 2;
-                        moveSuccessful = true;
                     }
-
-                    if(row == 1 && valBoard[row][col] != 0 && valBoard[row - 1][col] == 0)
-                    {
-                        valBoard[row-1][col] = valBoard[row][col];
-                        valBoard[row][col] = 0;
-                        setBrickColor(0, row, col);
-
-                        moveSuccessful = true;
-                    }
+                        count++;
                 }
             }
         }
-
-        if(addTogether()) {
-            moveSuccessful = true;
+        for(int col=0;col<4;col++) {
+            for(int row=4-1;row>0;row--) {
+                if(this.valBoard[row][col]==this.valBoard[row-1][col]) {
+                    this.valBoard[row][col]+=this.valBoard[row-1][col];
+                    this.valBoard[row-1][col]=0;
+                    setBrickColor(valBoard[row][col], row, col);
+                    setBrickColor(0, row-1, col);
+                    setScore(valBoard[row][col]);
+                    added = true;
+                    break;
+                }
+            }
         }
-        System.out.println(moveSuccessful);
-        return moveSuccessful;
+        for(int col=0;col<4;col++) {
+            int count=0;
+            for(int row=4-1;row>=0;row--) {
+                if(this.valBoard[row][col]!=0) {
+                    this.valBoard[4-1-count][col]=this.valBoard[row][col];
+                    setBrickColor(valBoard[4-1-count][col], 4-1-count, col);
+                    if(4-1-count!=row) {
+                        this.valBoard[row][col]=0;
+                        setBrickColor(0, row, col);
+                    }
+                        count++;
+                }
+            }
+        }
+        if(added) {
+            insertStartValues();
+        }
     }
 
-    public void moveAndInsert(boolean moveSuccessful) {
-        for(int row = 1; row < 4; row++) {
-            for(int col = 0; col < 4; col++) {
-                if(row > 0) {
-                    if(valBoard[row][col] != 0 && valBoard[row - 1][col] == 0 && (row > 1)) {
-                        valBoard[row-1][col] = valBoard[row][col];
-                        valBoard[row][col] = 0;
-                        row = row - 2;
+    public void moveLeft() {
+        boolean added = false;
+        for(int row=0;row<4;row++)  {
+            int count=0;
+            for(int col=0;col<4;col++) {
+                if(this.valBoard[row][col]!=0) {
+                    this.valBoard[row][count]=this.valBoard[row][col];
+                    setBrickColor(valBoard[row][col], row, count);
+                    if(count !=col) {
+                        this.valBoard[row][col]=0;
+                        setBrickColor(0, row, col);
                     }
+                        count++;
+                    }
+                }
+            }
 
-                    if(row == 1 && valBoard[row][col] != 0 && valBoard[row - 1][col] == 0) {
-                        valBoard[row-1][col] = valBoard[row][col];
-                        valBoard[row][col] = 0;
-                    }
+        for(int row=0;row<4;row++) {
+            for(int col=0;col<4-1;col++) {
+                if(this.valBoard[row][col]==this.valBoard[row][col+1]) {
+                    this.valBoard[row][col]+=this.valBoard[row][col+1];
+                    this.valBoard[row][col+1]=0;
+                    added = true;
+                    setScore(valBoard[row][col]);
+                    setBrickColor(valBoard[row][col], row, col);
+                    setBrickColor(0, row, col+1);
+                    break;
                 }
             }
         }
 
-        if(moveSuccessful) {
+        for(int row=0;row<4;row++) {
+            int count=0;
+            for(int col=0;col<4;col++) {
+                if(this.valBoard[row][col]!=0) {
+                    this.valBoard[row][count]=this.valBoard[row][col];
+                    setBrickColor(valBoard[row][count], row, count);
+                    if(count !=col) {
+                        this.valBoard[row][col]=0;
+                        setBrickColor(0, row, col);
+                    }
+                        count++;
+                }
+            }
+        }
+        if(added) {
+            insertStartValues();
+        }
+    }
+
+    public void moveRight() {
+        boolean added = false;
+        for(int row=0;row<4;row++) {
+            int count=0;
+            for(int col=4-1;col>=0;col--) {
+                if(this.valBoard[row][col]!=0) {
+                    this.valBoard[row][4-1-count]=this.valBoard[row][col];
+                    setBrickColor(valBoard[row][4-1-count], row, 4-1-count);
+                    if(4-1-count!=col) {
+                        this.valBoard[row][col]=0;
+                        setBrickColor(0, row, col);
+                    }
+                        count++;
+                }
+            }
+        }
+
+        for(int row=0;row<4;row++) {
+            for(int col=4-1;col>0;col--) {
+                if(this.valBoard[row][col]==this.valBoard[row][col-1]) {
+                    this.valBoard[row][col]+=this.valBoard[row][col-1];
+                    setBrickColor(valBoard[row][col], row, col);
+                    setBrickColor(0, row, col);
+                    this.valBoard[row][col-1]=0;
+                    setScore(valBoard[row][col]);
+                    added = true;
+                    break;
+                }
+            }
+        }
+
+        for(int row=0;row<4;row++) {
+            int count=0;
+            for(int col=4-1;col>=0;col--) {
+                if(this.valBoard[row][col]!=0) {
+                    this.valBoard[row][4-1-count]=this.valBoard[row][col];
+                    setBrickColor(valBoard[row][4-1-count], row, 4-1-count);
+                    if(4-1-count!=col) {
+                        setBrickColor(0, row, col);
+                        this.valBoard[row][col]=0;
+                    }
+                        count++;
+                }
+            }
+        }
+        if(added) {
             insertStartValues();
         }
     }
@@ -357,7 +425,7 @@ public class application extends JFrame implements KeyListener{
         for(int i = 0; i < 4; i++){
             for(int j = 0; j < 4; j++) {
                 if(valBoard[i][j] != 0) {
-                    fullBoard++;
+                    //fullBoard++;
                 }
             }
         }
@@ -439,15 +507,12 @@ public class application extends JFrame implements KeyListener{
                 break;
             case 4:
                 changeBlock(i, j, "4", 110, "#7b6f60", "#ece0c8");
-                System.out.println("2");
                 break;
             case 8:
                 changeBlock(i,j,"8", 110, "#fff9f7", "#f2b179");
-                System.out.println("8");
                 break;
             case 16:
                 changeBlock(i,j, "16", 110, "#fff9f7", "#f59563");
-                System.out.println("16");
                 break;
             case 32:
                 changeBlock(i,j,"32", 110, "#fff9f7", "#f47d60");
