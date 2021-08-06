@@ -26,7 +26,7 @@ public class application extends JFrame implements KeyListener{
 
     public int highScoreINT = 0; // save to a textfile? And load from it?
     public int currentINT = 0; // update freq. and check if it exceeds highscore
-    public File highScoreFile = new File("/home/arvid/Code/java/2048/src/highscore.txt");
+    public File highScoreFile = new File("src/highscore.txt");
 
     private int[][] valBoard = new int[4][4];
 
@@ -466,7 +466,7 @@ public class application extends JFrame implements KeyListener{
 
     // Saves highscore to textfile,
     public void saveHighScore() throws IOException {
-        try (Writer writer = new BufferedWriter(new FileWriter("/home/arvid/Code/java/2048/src/highscore.txt"))) {
+        try (Writer writer = new BufferedWriter(new FileWriter("src/highscore.txt"))) {
             writer.write(Integer.toString(highScoreINT));
         } catch (IOException e) {
             e.printStackTrace();
