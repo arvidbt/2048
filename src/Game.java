@@ -26,19 +26,23 @@ public class Game extends JFrame implements KeyListener{
 
     public int[][] valBoard = new int[4][4];
 
-    private final Border border = new LineBorder(Color.decode("#bbada0"), 12, false);
+    private final Border border = new LineBorder(Color.decode("#bbada0"), 8, false);
+
+    public Icon restart = new ImageIcon("src/icons/restartfigma.jpg");
+    public ImageIcon frameIcon = new ImageIcon("src/icons/2048-icon.png");
 
     public Game() throws FileNotFoundException {
-        this.setSize(1000,1360);
+        this.setSize(480,853);
         this.setDefaultCloseOperation(EXIT_ON_CLOSE);
-        this.setTitle("2048");
+        this.setTitle("2048 by Arvid Bergman");
         this.setResizable(false);
         this.setLayout(null);
+        this.setIconImage(frameIcon.getImage());
         this.setBackground(Color.decode("#fbf8ef"));
 
         board.setLayout(new GridLayout(4,4));
-        board.setBounds(55,340,880,880);
-        topBoard.setBounds(10,20,980, 310);
+        board.setBounds(10,340,460,460);
+        topBoard.setBounds(10,20,460, 310);
         new Board(valBoard, boardPanels, boardNumbers);
         new Score(highScoreLabelPoints, scoreLabelPoints);
         new Application();
@@ -51,47 +55,36 @@ public class Game extends JFrame implements KeyListener{
         Score.loadHighScore();
         initScoreBoard();
         initBoard();
+        runGame();
     }
 
     private void initScoreBoard() {
         JPanel title = new JPanel();
-        JPanel info = new JPanel();
         JLabel titleLabel = new JLabel("2048");
         JLabel scoreLabel = new JLabel("Score:");
         JLabel highScoreLabel = new JLabel("Best:");
-        JLabel newGameButtonLabel = new JLabel("New Game");
-        JLabel infoLabel = new JLabel("Join the numbers and get to the 2048 tile!");
-
 
         topBoard.setLayout(null);
         topBoard.setBackground(Color.decode("#fbf8ef"));
 
-        scorePanel.setBounds(725,90, 180, 65);
+        scorePanel.setBounds(175,200, 150, 55);
         scorePanel.setBackground(Color.decode("#bcafa0"));
-        scoreLabelPoints.setFont(new Font("Verdana", Font.BOLD, 45));
+        scoreLabelPoints.setFont(new Font("Verdana", Font.BOLD, 25));
         scoreLabelPoints.setForeground(Color.decode("#fbf8ef"));
         scorePanel.add(scoreLabelPoints);
         topBoard.add(scorePanel);
 
-        highScorePanel.setBounds(505,90, 180, 65);
+        highScorePanel.setBounds(10,200, 150, 55);
         highScorePanel.setBackground(Color.decode("#bcafa0"));
-        highScoreLabelPoints.setFont(new Font("Verdana", Font.BOLD, 45));
+        highScoreLabelPoints.setFont(new Font("Verdana", Font.BOLD, 25));
         highScoreLabelPoints.setForeground(Color.decode("#fbf8ef"));
         highScorePanel.add(highScoreLabelPoints);
         topBoard.add(highScorePanel);
 
-        info.setBackground(Color.decode("#fbf8ef"));
-        info.setBounds(50, 210, 600, 100);
-        info.add(infoLabel);
-        infoLabel.setFont(new Font("Verdana", Font.BOLD, 25));
-        infoLabel.setForeground(Color.decode("#726b63"));
-        topBoard.add(info);
-
         topBoard.add(newGameButton);
-        newGameButton.setBackground(Color.decode("#8e7862"));
-        newGameButton.add(newGameButtonLabel);
+
         newGameButton.setFocusable(false);
-        newGameButton.setBounds(715, 190, 200,75);
+        newGameButton.setBounds(340, 160, 100,100);
         newGameButton.addActionListener(e-> {
             try {
                 newGame();
@@ -99,12 +92,11 @@ public class Game extends JFrame implements KeyListener{
                 ex.printStackTrace();
             }
         });
-        newGameButtonLabel.setFont(new Font("Verdana", Font.BOLD, 27));
-        newGameButtonLabel.setForeground(Color.decode("#fbf8ef"));
+        newGameButton.setIcon(restart);
 
         topBoard.add(score);
         score.setBackground(Color.decode("#bcafa0"));
-        score.setBounds(715,50, 200,125);
+        score.setBounds(175,160, 150,100);
         score.add(scoreLabel);
         scoreLabel.setFont(new Font("Verdana", Font.BOLD, 25));
         scoreLabel.setForeground(Color.decode("#fbf8ef"));
@@ -112,14 +104,14 @@ public class Game extends JFrame implements KeyListener{
 
         topBoard.add(highScore);
         highScore.setBackground(Color.decode("#bcafa0"));
-        highScore.setBounds(495, 50, 200,125);
+        highScore.setBounds(10, 160, 150,100);
         highScore.add(highScoreLabel);
         highScoreLabel.setFont(new Font("Verdana", Font.BOLD, 25));
         highScoreLabel.setForeground(Color.decode("#fbf8ef"));
 
         title.setBackground(Color.decode("#fbf8ef"));
-        title.setBounds(-40, 40, 500, 200);
-        titleLabel.setFont(new Font("Verdana",Font.BOLD,120));
+        title.setBounds(-25, -10, 500, 200);
+        titleLabel.setFont(new Font("Verdana",Font.BOLD,150));
         titleLabel.setForeground(Color.decode("#726b63"));
         title.add(titleLabel);
         topBoard.add(title);
@@ -129,7 +121,7 @@ public class Game extends JFrame implements KeyListener{
 
     private int spawnValues() {
         var test = Math.random();
-        if(test < 0.2) {
+        if(test < 0.1) {
             return 4;
         }
         else {
@@ -167,7 +159,6 @@ public class Game extends JFrame implements KeyListener{
         insertStartValues();
         board.setBackground(Color.decode("#fbf8ef"));
         this.add(board);
-        runGame();
     }
 
     private void newGame() throws IOException {

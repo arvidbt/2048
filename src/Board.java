@@ -49,37 +49,37 @@ public class Board {
                 break;
 
             case 2:
-                changeBlock(i, j, "2", 110, "#7b6f60", "#eee4da");
+                changeBlock(i, j, "2", 60, "#7b6f60", "#eee4da");
                 break;
             case 4:
-                changeBlock(i, j, "4", 110, "#7b6f60", "#ece0c8");
+                changeBlock(i, j, "4", 60, "#7b6f60", "#ece0c8");
                 break;
             case 8:
-                changeBlock(i,j,"8", 110, "#fff9f7", "#f2b179");
+                changeBlock(i,j,"8", 60, "#fff9f7", "#f2b179");
                 break;
             case 16:
-                changeBlock(i,j, "16", 110, "#fff9f7", "#f59563");
+                changeBlock(i,j, "16", 50, "#fff9f7", "#f59563");
                 break;
             case 32:
-                changeBlock(i,j,"32", 110, "#fff9f7", "#f47d60");
+                changeBlock(i,j,"32", 50, "#fff9f7", "#f47d60");
                 break;
             case 64:
-                changeBlock(i,j,"64", 110, "#fff9f7", "#f55d3c");
+                changeBlock(i,j,"64", 50, "#fff9f7", "#f55d3c");
                 break;
             case 128:
-                changeBlock(i,j,"128", 90, "#fff9f7", "#efcd72");
+                changeBlock(i,j,"128", 40, "#fff9f7", "#efcd72");
                 break;
             case 256:
-                changeBlock(i,j,"256", 90, "#fff9f7", "#eccc64");
+                changeBlock(i,j,"256", 40, "#fff9f7", "#eccc64");
                 break;
             case 512:
-                changeBlock(i,j,"512", 90, "#fff9f7", "#ecc850");
+                changeBlock(i,j,"512", 40, "#fff9f7", "#ecc850");
                 break;
             case 1024:
-                changeBlock(i,j,"1024", 70, "#fff9f7", "#edc53f");
+                changeBlock(i,j,"1024", 30, "#fff9f7", "#edc53f");
                 break;
             case 2048:
-                changeBlock(i,j,"2048", 70, "#fff9f7", "#ecc135");
+                changeBlock(i,j,"2048", 30, "#fff9f7", "#ecc135");
                 break;
         }
     }
