@@ -15,7 +15,7 @@ public class Board {
         Board.boardPanels = boardPanels;
     }
 
-    private static int spawnValues() {
+    public static int spawnValues() {
         var test = Math.random();
         if(test < 0.2) {
             return 4;
@@ -84,8 +84,6 @@ public class Board {
         }
     }
 
-    //TODO
-    //Fix number center
     public static void changeBlock(int i, int j, String number, int fontSize, String fontColor, String panelColor) {
         boardNumbers[i][j].setText(number);
         boardPanels[i][j].add(boardNumbers[i][j]);

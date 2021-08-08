@@ -14,17 +14,17 @@ public class Game extends JFrame implements KeyListener{
     public JPanel topBoard = new JPanel();
     public JPanel score = new JPanel();
     public JPanel highScore = new JPanel();
+    public JPanel scorePanel = new JPanel();
+    public JPanel highScorePanel = new JPanel();
+
     public JButton newGameButton = new JButton();
-    public JPanel[][] boardPanels = new JPanel[4][4];
-    public JLabel[][] boardNumbers = new JLabel[4][4];
 
     public JLabel scoreLabelPoints = new JLabel("0");
     public JLabel highScoreLabelPoints = new JLabel("0");
 
-    public JPanel scorePanel = new JPanel();
-    public JPanel highScorePanel = new JPanel();
-
     public int[][] valBoard = new int[4][4];
+    public JPanel[][] boardPanels = new JPanel[4][4];
+    public JLabel[][] boardNumbers = new JLabel[4][4];
 
     private final Border border = new LineBorder(Color.decode("#bbada0"), 8, false);
 
@@ -67,16 +67,16 @@ public class Game extends JFrame implements KeyListener{
         topBoard.setLayout(null);
         topBoard.setBackground(Color.decode("#fbf8ef"));
 
-        scorePanel.setBounds(175,200, 150, 55);
+        scorePanel.setBounds(175,210, 150, 45);
         scorePanel.setBackground(Color.decode("#bcafa0"));
-        scoreLabelPoints.setFont(new Font("Verdana", Font.BOLD, 25));
+        scoreLabelPoints.setFont(new Font("Verdana", Font.BOLD, 30));
         scoreLabelPoints.setForeground(Color.decode("#fbf8ef"));
         scorePanel.add(scoreLabelPoints);
         topBoard.add(scorePanel);
 
-        highScorePanel.setBounds(10,200, 150, 55);
+        highScorePanel.setBounds(10,210, 150, 45);
         highScorePanel.setBackground(Color.decode("#bcafa0"));
-        highScoreLabelPoints.setFont(new Font("Verdana", Font.BOLD, 25));
+        highScoreLabelPoints.setFont(new Font("Verdana", Font.BOLD, 30));
         highScoreLabelPoints.setForeground(Color.decode("#fbf8ef"));
         highScorePanel.add(highScoreLabelPoints);
         topBoard.add(highScorePanel);
@@ -98,7 +98,7 @@ public class Game extends JFrame implements KeyListener{
         score.setBackground(Color.decode("#bcafa0"));
         score.setBounds(175,160, 150,100);
         score.add(scoreLabel);
-        scoreLabel.setFont(new Font("Verdana", Font.BOLD, 25));
+        scoreLabel.setFont(new Font("Verdana", Font.BOLD, 35));
         scoreLabel.setForeground(Color.decode("#fbf8ef"));
 
 
@@ -106,7 +106,7 @@ public class Game extends JFrame implements KeyListener{
         highScore.setBackground(Color.decode("#bcafa0"));
         highScore.setBounds(10, 160, 150,100);
         highScore.add(highScoreLabel);
-        highScoreLabel.setFont(new Font("Verdana", Font.BOLD, 25));
+        highScoreLabel.setFont(new Font("Verdana", Font.BOLD, 35));
         highScoreLabel.setForeground(Color.decode("#fbf8ef"));
 
         title.setBackground(Color.decode("#fbf8ef"));
@@ -117,31 +117,6 @@ public class Game extends JFrame implements KeyListener{
         topBoard.add(title);
 
         this.add(topBoard);
-    }
-
-    private int spawnValues() {
-        var test = Math.random();
-        if(test < 0.1) {
-            return 4;
-        }
-        else {
-            return 2;
-        }
-    }
-
-    public void insertStartValues() {
-        boolean inserted = false;
-        while(!inserted) {
-            int row = ThreadLocalRandom.current().nextInt(0, 3 + 1);
-            int col = ThreadLocalRandom.current().nextInt(0, 3 + 1);
-            if(valBoard[row][col] == 0) {
-                int val = spawnValues();
-                valBoard[row][col] = val;
-                Board.setBrickColor(val, row, col);
-                System.out.println("spawn at ("+ row + "," + col + ") " + val);
-                inserted = true;
-            }
-        }
     }
 
     private void initBoard() {
@@ -155,8 +130,8 @@ public class Game extends JFrame implements KeyListener{
                 valBoard[i][j] = 0;
             }
         }
-        insertStartValues();
-        insertStartValues();
+        Board.insertStartValues();
+        Board.insertStartValues();
         board.setBackground(Color.decode("#fbf8ef"));
         this.add(board);
     }
@@ -171,8 +146,8 @@ public class Game extends JFrame implements KeyListener{
         Score.setHighScore();
         Score.resetScore();
         removeKeyListener(this);
-        insertStartValues();
-        insertStartValues();
+        Board.insertStartValues();
+        Board.insertStartValues();
         runGame();
     }
 
@@ -185,7 +160,7 @@ public class Game extends JFrame implements KeyListener{
 
     public void keyPressed(KeyEvent e) {
         int key = e.getKeyCode();
-        if(Application.isGameOver()) {
+        if(!Application.boardIsFull()) {
             if (key == KeyEvent.VK_RIGHT) {
                 Application.moveRight();
             } else if (key == KeyEvent.VK_LEFT) {

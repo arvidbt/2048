@@ -8,7 +8,6 @@ public class Application {
         Application.valBoard = Board.valBoard;
     }
 
-
     public static void moveUp() {
         boolean added = false;
         moverUp();
@@ -17,10 +16,10 @@ public class Application {
                 if(valBoard[row][col]== valBoard[row+1][col]) {
                     valBoard[row][col] += valBoard[row + 1][col];
                     valBoard[row+1][col]=0;
+                    added = true;
                     Board.setBrickColor(valBoard[row][col], row, col);
                     Board.setBrickColor(0, row+1, col);
                     Score.setScore(valBoard[row][col]);
-                    added = true;
                     break;
                 }
             }
@@ -56,10 +55,10 @@ public class Application {
                 if(valBoard[row][col]== valBoard[row-1][col]) {
                     valBoard[row][col]+= valBoard[row-1][col];
                     valBoard[row-1][col]=0;
+                    added = true;
                     Board.setBrickColor(valBoard[row][col], row, col);
                     Board.setBrickColor(0, row-1, col);
                     Score.setScore(valBoard[row][col]);
-                    added = true;
                     break;
                 }
             }
@@ -133,11 +132,11 @@ public class Application {
             for(int col=4-1;col>0;col--) {
                 if(valBoard[row][col]== valBoard[row][col-1]) {
                     valBoard[row][col]+= valBoard[row][col-1];
+                    valBoard[row][col-1]=0;
+                    added = true;
                     Board.setBrickColor(valBoard[row][col], row, col);
                     Board.setBrickColor(0, row, col);
-                    valBoard[row][col-1]=0;
                     Score.setScore(valBoard[row][col]);
-                    added = true;
                     break;
                 }
             }
@@ -165,19 +164,19 @@ public class Application {
         }
     }
 
-    static boolean isGameOver() {
+    public static boolean boardIsFull() {
         int fullBoard = 0;
         for(int i = 0; i < 4; i++){
             for(int j = 0; j < 4; j++) {
                 if(valBoard[i][j] != 0) {
-                    //fullBoard++;
+                    fullBoard++;
                 }
             }
         }
-        return fullBoard != 16;
+        return fullBoard == 16;
     }
 
-    private boolean noMovesPossible() {
+    public boolean noMovesPossible() {
         boolean moveIsNotPossible = true;
         for(int row = 0; row < 4; row++) {
             for (int col = 3; col >= 0; col--) {
